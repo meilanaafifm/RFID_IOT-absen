@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RFID Presence Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+
+  <header class="topbar">
+    <div>
+      <h1>RFID Presence Console</h1>
+      <p>IoT Attendance Dashboard - Real-time Control Center</p>
+    </div>
+    <div class="actions">
+      <span id="sessionLabel" class="chip">Belum login</span>
+      <button id="logoutBtn" class="btn danger hidden">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="loginView" class="panel fade-in">
+      <h2>Login</h2>
+      <p class="subtitle">Masuk sebagai Admin, Guru, atau Siswa.</p>
+      <form id="loginForm" class="form-grid">
+        <label>
+          Username
+          <input id="username" type="text" required>
+        </label>
+        <label>
+          Password
+          <input id="password" type="password" required>
+        </label>
+        <button class="btn primary" type="submit">Masuk</button>
+      </form>
+      <p id="loginMessage" class="message"></p>
+      <small class="hint">Akun awal Admin: admin / kelompokiot</small>
+    </section>
+
+    <section id="adminView" class="hidden">
+      <div class="grid two-cols">
+        <article class="panel fade-in">
+          <h3>Dashboard Global</h3>
+          <div class="stats-row" id="adminStats"></div>
+          <button id="refreshStatsBtn" class="btn">Refresh Stats</button>
+        </article>
+
+        <article class="panel fade-in">
+          <h3>Konfigurasi Jam Masuk</h3>
+          <form id="configForm" class="form-grid compact">
+            <label>
+              Batas Hadir
+              <input id="hadirBatas" type="time" step="1" required>
+            </label>
+            <label>
+              Batas Terlambat
+              <input id="terlambatBatas" type="time" step="1" required>
+            </label>
+            <button class="btn primary" type="submit">Simpan Konfigurasi</button>
+          </form>
+          <p id="configMessage" class="message"></p>
+        </article>
+      </div>
+
+      <div class="grid two-cols">
+        <article class="panel fade-in">
+          <h3>Management Siswa</h3>
+          <input id="searchSiswa" placeholder="Cari siswa (nama, username, kelas, UID RFID)">
+          <form id="createSiswaForm" class="form-grid compact">
+            <input id="sUsername" placeholder="Username" required>
+            <input id="sPassword" type="password" placeholder="Password (min 8 karakter)" minlength="8" required>
+            <input id="sUid" placeholder="UID RFID" required>
+            <input id="sNama" placeholder="Nama" required>
+            <input id="sKelas" placeholder="Kelas" required>
+            <input id="sOrtu" placeholder="No Ortu" required>
+            <button class="btn primary" type="submit">Tambah Siswa</button>
+          </form>
+          <p id="siswaMessage" class="message"></p>
+          <div id="siswaList" class="list"></div>
+        </article>
+
+        <article class="panel fade-in">
+          <h3>Management Guru</h3>
+          <input id="searchGuru" placeholder="Cari guru (nama, username, NIP, mapel)">
+          <form id="createGuruForm" class="form-grid compact">
+            <input id="gUsername" placeholder="Username" required>
+            <input id="gPassword" type="password" placeholder="Password (min 8 karakter)" minlength="8" required>
+            <input id="gNama" placeholder="Nama" required>
+            <input id="gNip" placeholder="NIP" required>
+            <input id="gMapel" placeholder="Mata Pelajaran" required>
+            <button class="btn primary" type="submit">Tambah Guru</button>
+          </form>
+          <p id="guruMessage" class="message"></p>
+          <div id="guruList" class="list"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="guruView" class="hidden">
+      <div class="grid two-cols">
+        <article class="panel fade-in">
+          <h3>Presensi Kelas Hari Ini</h3>
+          <form id="kelasForm" class="form-inline">
+            <input id="kelasInput" placeholder="Contoh: XII-A" required>
+            <button class="btn primary" type="submit">Lihat Kelas</button>
+          </form>
+          <div id="kelasList" class="list"></div>
+        </article>
+
+        <article class="panel fade-in">
+          <h3>Manual Override</h3>
+          <form id="overrideForm" class="form-grid compact">
+            <input id="ovSiswaId" type="number" placeholder="Siswa ID" required>
+            <select id="ovStatus" required>
+              <option value="Hadir">Hadir</option>
+              <option value="Terlambat">Terlambat</option>
+              <option value="Alpa">Alpa</option>
+              <option value="Izin">Izin</option>
+            </select>
+            <input id="ovKet" placeholder="Keterangan (opsional)">
+            <button class="btn warning" type="submit">Simpan Override</button>
+          </form>
+          <p id="overrideMessage" class="message"></p>
+        </article>
+      </div>
+
+      <article class="panel fade-in">
+        <h3>Export Presensi Bulanan (JSON)</h3>
+        <form id="exportForm" class="form-inline wrap">
+          <input id="expKelas" placeholder="Kelas" required>
+          <input id="expBulan" type="number" min="1" max="12" placeholder="Bulan" required>
+          <input id="expTahun" type="number" min="2000" max="3000" placeholder="Tahun" required>
+          <button class="btn primary" type="submit">Ambil Data</button>
+        </form>
+        <pre id="exportResult" class="codebox"></pre>
+      </article>
+    </section>
+
+    <section id="siswaView" class="hidden">
+      <div class="grid two-cols">
+        <article class="panel fade-in">
+          <h3>Notifikasi Hari Ini</h3>
+          <button id="notifBtn" class="btn">Refresh Notifikasi</button>
+          <div id="notifCard" class="notice"></div>
+        </article>
+
+        <article class="panel fade-in">
+          <h3>Riwayat 30 Hari</h3>
+          <button id="historyBtn" class="btn">Refresh Riwayat</button>
+          <div id="historyList" class="list"></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
